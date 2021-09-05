@@ -16,7 +16,7 @@ contract('Election', function(accounts) {
     // Initialize electionInstance variable to use it on the next test.
     let electionInstance;
     // Test to see if the candidates are initialized with the correct data.
-    it('it initializes the candidates with the correct values', function() {
+    it('initializes the candidates with the correct values', function() {
         return Election.deployed().then(function(instance) {
             electionInstance = instance;
             return electionInstance.candidates(1);
