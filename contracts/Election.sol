@@ -10,8 +10,10 @@ contract Election {
         uint voteCount;
     }
 
-    // Store candidates using a mapping.
+    // Mapping variable to store all the candidates.
     mapping(uint => Candidate) public candidates;
+    // Mapping variable to store the accounts that already voted.
+    mapping(address => bool) public voters;
 
     // Variable to store the number of candidates.
     uint public candidatesCount;
@@ -23,7 +25,18 @@ contract Election {
     }
 
     function addCandidate(string memory _name) private {
+        // Increase the candidates count whenever a new candidate is included.
         candidatesCount ++;
+        // Add a new Candidate object to the candidates mapping.
         candidates[candidatesCount] = Candidate(candidatesCount, _name, 0);
+    }
+
+    function vote(uint _candidateId) public {
+        // Get the voter account address.
+        address voterAddress = msg.sender;
+        // Set the value in mapping to true, meaning the account has voted.
+        voters[voterAddress] = true;
+        // Update the candidates' vote count.
+        candidates[_candidateId].voteCount ++;
     }
 }
