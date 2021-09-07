@@ -10,13 +10,15 @@ App = {
   },
 
   // Initialize connection of the client side application to the local blockchain.
-  initWeb3: function() {
+  initWeb3: async function() {
     // TODO: refactor conditional.
     // If a web3 instance is already provided by Meta Mask.
     if (typeof web3 !== 'undefined') {
       // Set the web3 provider to the apps' web3 provider.
       App.web3Provider = web3.currentProvider;
       web3 = new Web3(web3.currentProvider);
+      // Request acess to the user account.
+      await web3.currentProvider.enable();
     } // If no web3 instance is provided. 
     else {
       // Specify default instance.
@@ -35,27 +37,8 @@ App = {
       App.contracts.Election = TruffleContract(election);
       // Set the provider of the contract as the provider created on the previous function.
       App.contracts.Election.setProvider(App.web3Provider);
-
-      App.listenForEvents();
       // Render the app.
       return App.render();
-    });
-  },
-
-  // Listen for events emitted from the contract.
-  listenForEvents: function() {
-    App.contracts.Election.deployed().then(function(instance) {
-      // Restart Chrome if you are unable to receive this event.
-      // This is a known issue with Metamask.
-      // https://github.com/MetaMask/metamask-extension/issues/2393
-      instance.votedEvent({}, {
-        fromBlock: 0,
-        toBlock: 'latest'
-      }).watch(function(error, event) {
-        console.log("event triggered", event)
-        // Reload when a new vote is recorded
-        App.render();
-      });
     });
   },
 
@@ -72,12 +55,14 @@ App = {
     content.hide();
 
     // Load the account we're connected to the blockchain with.
-    web3.eth.getCoinbase(function(err, account) {
+    web3.eth.getAccounts(function(err, accounts) {
       if (err === null) {
+        console.log('No errors getting the account.')
+        console.log('Account:', accounts[0])
         // Set the fetched account to the current account in the app.
-        App.account = account;
-        // Display the account in the account address section.
-        $("#accountAddress").html("Your Account: " + account);
+        App.account = accounts[0];
+        // Display the account in the accounts' address section.
+        $("#accountAddress").html("Your Account: " + accounts[0]);
       }
     });
 
@@ -105,24 +90,18 @@ App = {
           var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
           // Append the template to the table on the page.
           candidatesResults.append(candidateTemplate);
-
           // Render candidate ballot option.
           var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
           candidatesSelect.append(candidateOption);
         });
       }
-      return electionInstance.voters(App.account);
-    }).then(function(hasVoted) {
-      // Do not allow a user to vote
-      if(hasVoted) {
-        $('form').hide();
-      }
+
       loader.hide();
       content.show();
-    }).catch(function(error) {
+    }).cath(function(error) {
       console.warn(error);
     });
-  },
+  }
 
   // castVote: function() {
   //   var candidateId = $('#candidatesSelect').val();
