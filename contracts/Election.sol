@@ -18,7 +18,7 @@ contract Election {
     // Variable to store the number of candidates.
     uint public candidatesCount;
 
-    // Constructor.
+    // Constructor. Runs only once when contract is deployed.
     constructor() public {
         addCandidate('Candidate 1');
         addCandidate('Candidate 2');
@@ -34,7 +34,14 @@ contract Election {
     function vote(uint _candidateId) public {
         // Get the voter account address.
         address voterAddress = msg.sender;
-        // Set the value in mapping to true, meaning the account has voted.
+        // Require that the voter hasn't already voted.
+        require(!voters[voterAddress]);
+        // Require that the voter votes in a valid candidate.
+        require(_candidateId > 0 && _candidateId <= candidatesCount);
+        // Any gas spent on calling the function up to this point
+        // won't be returned to the user if the conditions fail.
+        
+        // Set the value in mapping to true, meaning the voter has voted.
         voters[voterAddress] = true;
         // Update the candidates' vote count.
         candidates[_candidateId].voteCount ++;
