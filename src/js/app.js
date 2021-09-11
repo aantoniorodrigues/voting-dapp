@@ -72,49 +72,53 @@ App = {
       // Get the candidates count.
       return electionInstance.candidatesCount();
     }).then(function(candidatesCount) {
-      var candidatesResults = $("#candidatesResults");
+      let candidatesResults = $("#candidatesResults");
       candidatesResults.empty();
 
-      var candidatesSelect = $('#candidatesSelect');
+      let candidatesSelect = $('#candidatesSelect');
       candidatesSelect.empty();
 
       // For loop to through all the candidates.
-      for (var i = 1; i <= candidatesCount; i++) {
+      for (let i = 1; i <= candidatesCount; i++) {
         electionInstance.candidates(i).then(function(candidate) {
           // Variables to store the ids, names and vote counts of each candidate.
-          var id = candidate[0];
-          var name = candidate[1];
-          var voteCount = candidate[2];
+          let id = candidate[0];
+          let name = candidate[1];
+          let voteCount = candidate[2];
 
           // Template to render the candidates' data.
-          var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
+          let candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
           // Append the template to the table on the page.
           candidatesResults.append(candidateTemplate);
           // Render candidate ballot option.
-          var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
+          let candidateOption = "<option value='" + id + "' >" + name + "</ option>"
           candidatesSelect.append(candidateOption);
         });
       }
-
+      return electionInstance.voters(App.account);
+    }).then(function(hasVoted) {
+      if (hasVoted) {
+        $('form').hide();
+      }
       loader.hide();
       content.show();
     }).cath(function(error) {
       console.warn(error);
     });
-  }
+  },
 
-  // castVote: function() {
-  //   var candidateId = $('#candidatesSelect').val();
-  //   App.contracts.Election.deployed().then(function(instance) {
-  //     return instance.vote(candidateId, { from: App.account });
-  //   }).then(function(result) {
-  //     // Wait for votes to update.
-  //     $("#content").hide();
-  //     $("#loader").show();
-  //   }).catch(function(err) {
-  //     console.error(err);
-  //   });
-  // }
+  castVote: function() {
+    var candidateId = $('#candidatesSelect').val();
+    App.contracts.Election.deployed().then(function(instance) {
+      return instance.vote(candidateId, { from: App.account });
+    }).then(function(result) {
+      // Wait for votes to update.
+      $("#content").hide();
+      $("#loader").show();
+    }).catch(function(err) {
+      console.error(err);
+    });
+  }
 };
 
 $(function() {
