@@ -18,12 +18,21 @@ contract Election {
     // Variable to store the number of candidates.
     uint public candidatesCount;
 
-    // Constructor. Runs only once when contract is deployed.
+    // Event to emit when a user votes.
+    event votedEvent(uint indexed _candidateId);
+
+    /**
+     * @dev Runs only once when contract is deployed
+     */
     constructor() public {
         addCandidate('Candidate 1');
         addCandidate('Candidate 2');
     }
 
+    /**
+     * @dev Adds a new candidate to the list of candidates
+     * @param _name Candidate's name
+     */
     function addCandidate(string memory _name) private {
         // Increase the candidates count whenever a new candidate is included.
         candidatesCount ++;
@@ -31,6 +40,10 @@ contract Election {
         candidates[candidatesCount] = Candidate(candidatesCount, _name, 0);
     }
 
+    /**
+     * @dev Allows the user to vote for a candidate
+     * @param _candidateId Id of the candidate to vote on
+     */
     function vote(uint _candidateId) public {
         // Get the voter account address.
         address voterAddress = msg.sender;
@@ -45,5 +58,7 @@ contract Election {
         voters[voterAddress] = true;
         // Update the candidates' vote count.
         candidates[_candidateId].voteCount ++;
+        // Trigger the voted event.
+        emit votedEvent(_candidateId);
     }
 }

@@ -37,8 +37,26 @@ App = {
       App.contracts.Election = TruffleContract(election);
       // Set the provider of the contract as the provider created on the previous function.
       App.contracts.Election.setProvider(App.web3Provider);
+      App.listenForEvents();
       // Render the app.
       return App.render();
+    });
+  },
+
+  // Listen for event emmited from the contract.
+  listenForEvents: function() {
+    // Deployed instnce of the contract.
+    App.contracts.Election.deployed().then(function(instance) {
+      // Restart Chrome if unable to receive this event.
+      // This is a known issue with MetaMask.
+      instance.votedEvent({}, {
+        fromBlock: 0,
+        toBlock: 'latest'
+      }).watch(function(error, event) {
+        console.log('event triggered', event);
+        // Reloaa the page when a new vote is casted.
+        App.render();
+      });
     });
   },
 
@@ -102,7 +120,7 @@ App = {
       }
       loader.hide();
       content.show();
-    }).cath(function(error) {
+    }).catch(function(error) {
       console.warn(error);
     });
   },
